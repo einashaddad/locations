@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 import pymongo
 import os
 from models import Location 
@@ -16,16 +17,29 @@ def create_location(location):
     Saves the location
     '''
     entries = db.entries
-
     entries.insert(location.jsonify())
+    return entries.find_one({"lat": location.lat, "lng": location.lng})
 
-def view_location(name):
+def view_location(location_id = None):
     entries = db.entries
 
-    locations = entries.find({'name': name})
-    
+    if location_id:
+        locations = entries.find({ "_id" : ObjectId(location_id) })
+    else:
+        locations = list(entries.find())
+
     return [Location(name = location['name'], 
-            lat = location['lat'], 
-            lng = location['lng'], 
-            address = location['address']) for location in locations]
+        lat = location['lat'], 
+        lng = location['lng'], 
+        address = location['address']) for location in locations]
+
+def update_location(location, location_id):
+    entries = db.entries
+    old_entry = list(entries.find({"_id": ObjectId(location_id)}))
+    entries.update(old_entry[0], {"$set": location.jsonify()})
+
+    return entries.find_one({ "_id" : ObjectId(location_id)})
+
+def delete_location(location_id):
+    pass
 
