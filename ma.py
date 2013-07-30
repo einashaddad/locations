@@ -53,8 +53,8 @@ def update(location_id):
     '''
     Edits/Updates the location
     '''
-    # if not location_id or request.data:
-    #     abort(404)
+    if not location_id or request.data:
+        abort(404)
     data = json.loads(request.data)
     new_name = data['name']
     new_address = data['address']
@@ -66,14 +66,17 @@ def update(location_id):
     new_location = mongo.update_location(location_id=location_id, location=location)
     return updated_jsonify(new_location)
 
-@app.route('/api/locations/<location_id>')
-def delete():
-    pass
+@app.route('/api/locations/<location_id>', methods = ['DELETE'])
+def delete(location_id):
+    if not location_id:
+        abort(404)
+    if not mongo.delete_location(location_id):
+        return "OK"
+    abort(404)
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({ 'error': 'Not Found'}), 404)
-
 
 class APIEncoder(json.JSONEncoder):
     def default(self, obj):

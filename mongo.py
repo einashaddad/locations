@@ -41,5 +41,12 @@ def update_location(location, location_id):
     return entries.find_one({ "_id" : ObjectId(location_id)})
 
 def delete_location(location_id):
-    pass
+    entries = db.entries
+
+    entries.remove({"_id": ObjectId(location_id)})
+    found = entries.find({"_id": ObjectId(location_id)})
+    if found:
+        return False
+    return True
+
 
